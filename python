@@ -1,0 +1,56 @@
+# IoT Based Home Security - Software Dashboard
+# Tech Stack: Python + Flask + Telegram Alert
+
+from flask import Flask, render_template_string, request
+import datetime
+
+app = Flask(__name__)
+
+# Simulated Sensor Data (In real project, this comes from ESP32 / PIR Sensor)
+security_log = []
+system_armed = True
+
+HTML_PAGE = """
+<h2>🏠 IoT Home Security Dashboard</h2>
+<p>Status: <b>{{ status }}</b> | Last Update: {{ time }}</p>
+<form method="post">
+    <button name="action" value="arm">Arm System</button>
+    <button name="action" value="disarm">Disarm System</button>
+    <button name="action" value="intrusion">Simulate Intrusion</button>
+</form>
+<h3>Activity Log:</h3>
+<ul>
+{% for log in logs %}
+<li>{{ log }}</li>
+{% endfor %}
+</ul>
+"""
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    global system_armed
+    if request.method == 'POST':
+        action = request.form.get('action')
+        now = datetime.datetime.now().strftime("%H:%M:%S")
+        
+        if action == 'arm':
+            system_armed = True
+            security_log.append(f"[{now}] System ARMED by user")
+        elif action == 'disarm':
+            system_armed = False
+            security_log.append(f"[{now}] System DISARMED by user")
+        elif action == 'intrusion':
+            if system_armed:
+                msg = f"[{now}] ALERT! Intrusion Detected! Motion at Main Door"
+                security_log.append(msg)
+                print("Sending Telegram/Email Alert...") # Here you integrate Telegram Bot API
+            else:
+                security_log.append(f"[{now}] Motion detected but system is disarmed - Ignored")
+
+    status = "ARMED 🟢" if system_armed else "DISARMED 🔴"
+    return render_template_string(HTML_PAGE, status=status, 
+                                  time=datetime.datetime.now(), 
+                                  logs=reversed(security_log[-10:]))
+
+if __name__ == '__main__':
+    app.run(debug=True)
