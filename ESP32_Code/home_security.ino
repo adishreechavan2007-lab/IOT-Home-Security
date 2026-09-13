@@ -1,32 +1,44 @@
-#include <WiFi.h>
+// IoT Home Security System
+// Made by Adishree Chavan - 1st Year Project
+// Components: ESP32, PIR sensor, Door sensor, Buzzer
 
-#define PIR_PIN 13
-#define DOOR_PIN 12
-#define BUZZER_PIN 14
+int pirPin = 13;      // PIR sensor pin
+int doorPin = 12;     // door sensor pin  
+int buzzerPin = 14;   // buzzer pin
 
 void setup() {
   Serial.begin(115200);
-  pinMode(PIR_PIN, INPUT);
-  pinMode(DOOR_PIN, INPUT_PULLUP);
-  pinMode(BUZZER_PIN, OUTPUT);
-  Serial.println("IoT Home Security Started");
+  pinMode(pirPin, INPUT);
+  pinMode(doorPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  
+  Serial.println("System Started...");
+  Serial.println("Home Security Active");
 }
 
 void loop() {
-  int motion = digitalRead(PIR_PIN);
-  int door = digitalRead(DOOR_PIN);
+  int motion = digitalRead(pirPin);
+  int doorStatus = digitalRead(doorPin);
 
-  if (motion == HIGH) {
-    Serial.println("ALERT! Motion Detected!");
-    digitalWrite(BUZZER_PIN, HIGH);
+  // check motion
+  if(motion == 1) {
+    Serial.println("Motion Detected! Alert!");
+    digitalWrite(buzzerPin, HIGH);
+    delay(500);
   }
-  if (door == LOW) {
-    Serial.println("ALERT! Door Opened!");
-    digitalWrite(BUZZER_PIN, HIGH);
+  
+  // check door
+  if(doorStatus == 0) {
+    Serial.println("Door Opened! Alert!");
+    digitalWrite(buzzerPin, HIGH);
+    delay(500);
   }
-  if (motion == LOW && door == HIGH) {
-    digitalWrite(BUZZER_PIN, LOW);
-    Serial.println("Status: SAFE");
+
+  // if everything ok
+  if(motion == 0 && doorStatus == 1) {
+    Serial.println("All Safe");
+    digitalWrite(buzzerPin, LOW);
   }
-  delay(1000);
+
+  delay(1000); // wait 1 sec
 }
