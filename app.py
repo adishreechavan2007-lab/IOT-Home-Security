@@ -1,52 +1,52 @@
-from flask import Flask, render_template_string
+# Simple Home Security Dashboard
+# Made by Adishree Chavan
+
+from flask import Flask
 import random
-from datetime import datetime
+import time
 
 app = Flask(__name__)
 
-HTML = """
-<!DOCTYPE html>
+# simple html page
+html_code = """
 <html>
-<head>
-<title>IoT Home Security - ESP32</title>
-<meta http-equiv="refresh" content="3">
-<style>
-body { font-family: Arial; background: #0f172a; color: white; text-align: center; padding-top: 30px; }
-.card { background: #1e293b; width: 350px; margin: auto; padding: 25px; border-radius: 15px; box-shadow: 0 0 20px #000; }
-.safe { color: #22c55e; font-size: 32px; }
-.alert { color: #ef4444; font-size: 32px; animation: blink 1s infinite; }
-@keyframes blink { 50% { opacity: 0.5; } }
-p { font-size: 18px; }
-</style>
-</head>
-<body>
-<h1>🏠 IoT Home Security System</h1>
-<h3>ESP32 + PIR + Door Sensor</h3>
-<div class="card">
-<h2 class="{{ 'alert' if status=='ALERT!' else 'safe' }}">{{ status }}</h2>
-<p>🕵️ PIR: {{ pir }}</p>
-<p>🚪 Door: {{ door }}</p>
-<p>🔊 Buzzer: {{ buzzer }}</p>
-<p style="font-size:12px; opacity:0.6;">Last Update: {{ time }}</p>
-</div>
-<p>Made by Adishree Chavan</p>
+<head><title>Home Security</title></head>
+<body style="text-align:center; font-family: Arial; margin-top:50px;">
+    <h1>Home Security System</h1>
+    <h2>Made by Adishree Chavan</h2>
+    <div style="border:2px solid black; padding:20px; margin:20px;">
+        <p id="status">Checking...</p>
+        <p id="time"></p>
+    </div>
+    <p>This is simulation of PIR and Door sensor</p>
+    <script>
+        function update() {
+            let motion = Math.random() > 0.7;
+            let door = Math.random() > 0.8;
+            let status = document.getElementById("status");
+            let time = document.getElementById("time");
+            
+            time.innerHTML = new Date().toLocaleTimeString();
+            
+            if(motion || door) {
+                status.innerHTML = "<h2 style='color:red;'>ALERT! Motion or Door Open!</h2><p>Buzzer: ON</p>";
+                status.style.background = "#ffcccc";
+            } else {
+                status.innerHTML = "<h2 style='color:green;'>SAFE - All Good</h2><p>Buzzer: OFF</p>";
+                status.style.background = "#ccffcc";
+            }
+        }
+        setInterval(update, 2000);
+        update();
+    </script>
 </body>
 </html>
 """
 
 @app.route('/')
 def home():
-    pir = random.choice(["No Motion", "Motion Detected!"])
-    door = random.choice(["Door Closed", "Door Opened!"])
-    is_alert = "Detected" in pir or "Opened" in door
-    
-    return render_template_string(HTML, 
-        pir=pir, 
-        door=door,
-        status="ALERT!" if is_alert else "SAFE",
-        buzzer="ON 🔊" if is_alert else "OFF",
-        time=datetime.now().strftime("%H:%M:%S")
-    )
+    return html_code
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    print("Starting server...")
+    app.run(host='0.0.0.0', port=5000)
